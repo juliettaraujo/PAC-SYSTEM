@@ -1,0 +1,100 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <div class="lg:col-span-1">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <!-- Añadimos el ID form-title para el Javascript -->
+            <h3 id="form-title" class="text-lg font-bold text-slate-900 mb-6">Nuevo Circuito</h3>
+            
+            <!-- Añadimos el ID circuit-form para el Javascript -->
+            <form id="circuit-form" action="/add_circuit" method="POST" class="space-y-4 text-sm">
+                
+                <!-- CAMPOS OCULTOS NECESARIOS -->
+                <input type="hidden" name="id" value="">
+                <input type="hidden" name="amps" value="0">
+                
+                <div>
+                    <label class="block text-slate-500 mb-1">Nombre del Circuito</label>
+                    <input type="text" name="name" class="w-full border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500" placeholder="Ej. CENTRO" required>
+                </div>
+                <div>
+                    <label class="block text-slate-500 mb-1">Nomenclatura</label>
+                    <input type="text" name="nomenclature" class="w-full border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500" placeholder="Ej. D-805" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-500 mb-1">Tensión</label>
+                        <select name="voltage" class="w-full border-slate-200 rounded-lg p-2.5 bg-slate-50">
+                            <option value="13.8">13.8 kV</option>
+                            <option value="34.5">34.5 kV</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Bloque</label>
+                        <select name="block" class="w-full border-slate-200 rounded-lg p-2.5 bg-slate-50">
+                            <option value="A">Bloque A</option>
+                            <option value="B">Bloque B</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors mt-4">
+                    GUARDAR CIRCUITO
+                </button>
+                <button type="button" onclick="location.reload()" class="w-full text-slate-500 text-xs font-bold py-2 mt-2 hover:text-slate-800 uppercase tracking-wide">
+                    Cancelar / Nuevo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Circuitos Registrados</h3>
+            </div>
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-slate-400 font-semibold text-[11px] uppercase">
+                    <tr>
+                        <th class="px-6 py-4">Nombre / Nomen</th>
+                        <th class="px-6 py-4 text-center">Tensión</th>
+                        <th class="px-6 py-4 text-center">Bloque</th>
+                        <th class="px-6 py-4 text-right">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for c in circuits %}
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <!-- El formulario incrustado fue eliminado para dejar solo texto limpio -->
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-900">{{ c.name }}</div>
+                            <div class="text-xs text-slate-400 font-mono">{{ c.nomenclature }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-center font-medium text-slate-700">{{ c.voltage }} kV</td>
+                        <td class="px-6 py-4 text-center font-medium text-slate-700">Bloque {{ c.block }}</td>
+                        <td class="px-6 py-4 text-right flex justify-end gap-2">
+                            <button onclick="fillForm('{{c.id}}', '{{c.name}}', '{{c.nomenclature}}', '{{c.voltage}}', '{{c.block}}', '{{c.amps}}')" class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase hover:bg-blue-100 transition-colors">Editar</button>
+                            <a href="/delete_circuit/{{c.id}}" onclick="return confirm('¿Borrar circuito?')" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase hover:bg-red-100 transition-colors">Borrar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<script>
+function fillForm(id, name, nomen, volt, block, amps) {
+    document.getElementById('form-title').innerText = 'Editar: ' + name;
+    document.getElementById('circuit-form').action = '/update_circuit';
+    document.getElementsByName('id')[0].value = id;
+    document.getElementsByName('name')[0].value = name;
+    document.getElementsByName('nomenclature')[0].value = nomen;
+    document.getElementsByName('voltage')[0].value = volt;
+    document.getElementsByName('block')[0].value = block;
+    document.getElementsByName('amps')[0].value = amps;
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+</div>
+{% endblock %}
