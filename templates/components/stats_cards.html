@@ -1,0 +1,61 @@
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+    <!-- TOTAL DEL DIA -->
+    <div class="corp-card corp-blue-card p-4 relative overflow-hidden">
+        <div class="flex items-center gap-2">
+    <span class="text-xl">⚡</span>
+
+    <p class="text-white text-[13px] uppercase tracking-[2px] font-black text-blue-100">
+        Carga Total Administrada
+    </p>
+</div>
+
+        <div class="flex items-end gap-2 mt-3">
+            <h2 class="text-5xl font-black leading-none">
+                {{ total_dia }}
+            </h2>
+            <span class="text-sm font-bold opacity-90 mb-1">
+                MW
+            </span>
+        </div>
+    </div>
+
+    <!-- PAC ACTIVO -->
+    <div class="corp-card corp-blue-card p-4 relative overflow-hidden">
+        <div class="flex items-center gap-2">
+    <span class="text-xl">🚨</span>
+
+    <p class="text-white text-[13px] uppercase tracking-[2px] font-black text-blue-100">
+        MW en PAC Activo
+    </p>
+</div>
+        <div class="flex items-end gap-2 mt-3">
+            <h2 class="text-5xl font-black text-red-600 leading-none">
+                {{ pac_mw }}
+            </h2>
+            <span class="text-sm font-bold opacity-90 mb-1">
+                MW
+            </span>
+        </div>
+    </div>
+
+    <!-- RECUPERADOS -->
+    <div class="corp-card corp-blue-card p-4 relative overflow-hidden">
+        <div class="flex items-center gap-2">
+    <span class="text-xl">✅</span>
+
+    <p class="text-white text-[13px] uppercase tracking-[2px] font-black text-blue-100">
+        MW Recuperados
+    </p>
+</div>
+
+        <div class="flex items-end gap-2 mt-3">
+            <h2 class="text-5xl font-black text-green-600 leading-none">
+                {{ recuperados_mw }}
+            </h2>
+            <span class="text-sm font-bold opacity-90 mb-1">
+                MW
+            </span>
+        </div>
+    </div>
+</div>

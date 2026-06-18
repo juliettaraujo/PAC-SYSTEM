@@ -2,90 +2,152 @@
 {% block content %}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     
-    <div class="lg:col-span-1">
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <!-- Añadimos el ID form-title para el Javascript -->
-            <h3 id="form-title" class="text-lg font-bold text-slate-900 mb-6">Nuevo Circuito</h3>
+    <div class="lg:col-span-1 space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-blue-600 overflow-hidden p-6">
+            <h3 id="form-title" class="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
+                <span id="form-text-title">Nuevo Circuito</span>
+            </h3>
             
-            <!-- Añadimos el ID circuit-form para el Javascript -->
             <form id="circuit-form" action="/add_circuit" method="POST" class="space-y-4 text-sm">
-                
-                <!-- CAMPOS OCULTOS NECESARIOS -->
                 <input type="hidden" name="id" value="">
                 <input type="hidden" name="amps" value="0">
                 
                 <div>
-                    <label class="block text-slate-500 mb-1">Nombre del Circuito</label>
-                    <input type="text" name="name" class="w-full border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500" placeholder="Ej. CENTRO" required>
+                    <label class="block text-slate-600 font-bold mb-1">Nombre del Circuito</label>
+                    <input type="text" name="name" class="w-full border border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none uppercase font-bold" required>
                 </div>
                 <div>
-                    <label class="block text-slate-500 mb-1">Nomenclatura</label>
-                    <input type="text" name="nomenclature" class="w-full border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500" placeholder="Ej. D-805" required>
+                    <label class="block text-slate-600 font-bold mb-1">Nomenclatura</label>
+                    <input type="text" name="nomenclature" class="w-full border border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none uppercase font-bold" required>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-slate-500 mb-1">Tensión</label>
-                        <select name="voltage" class="w-full border-slate-200 rounded-lg p-2.5 bg-slate-50">
-                            <option value="13.8">13.8 kV</option>
-                            <option value="34.5">34.5 kV</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-slate-500 mb-1">Bloque</label>
-                        <select name="block" class="w-full border-slate-200 rounded-lg p-2.5 bg-slate-50">
-                            <option value="A">Bloque A</option>
-                            <option value="B">Bloque B</option>
-                        </select>
-                    </div>
+                <div>
+                    <label class="block text-slate-600 font-bold mb-1">Voltaje</label>
+                    <select name="voltage" class="w-full border border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-bold">
+                        <option value="13.8">13.8 kV</option>
+                        <option value="34.5">34.5 kV</option>
+                    </select>
                 </div>
-                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors mt-4">
-                    GUARDAR CIRCUITO
+                <div>
+                    <label class="block text-slate-600 font-bold mb-1">Seleccione un bloque</label>
+                <select name="block" class="w-full border border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-800 outline-none font-bold uppercase">
+                    {% for b in BLOQUES %}
+                    <option value="{{ b }}">Bloque {{ b }}</option>
+                    {% endfor %}
+            </select>
+                </div>
+                <button type="submit" class="w-full bg-blue-800 hover:bg-blue-700 text-white font-black uppercase text-xs py-3 rounded-lg tracking-wider transition-all shadow-sm">
+                    Guardar Circuito
                 </button>
-                <button type="button" onclick="location.reload()" class="w-full text-slate-500 text-xs font-bold py-2 mt-2 hover:text-slate-800 uppercase tracking-wide">
-                    Cancelar / Nuevo
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-red-600">
+            <h3 class="text-lg font-black text-slate-900 mb-2 flex items-center gap-2">🔄 REINICIAR SISTEMA</h3>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed font-medium">
+                Esta acción restablecerá los valores operativos de todos los circuitos a su estado inicial. 
+                <strong class="text-red-600 font-bold">No se eliminará ningún circuito del catálogo.</strong>
+            </p>
+            
+            <form action="/reset_system" method="POST" onsubmit="confirmForm(event, 'Esta acción restablecerá las cargas y estados actuales de todos los circuitos, pero conservará tu catálogo intacto.', 'Sí, reiniciar turno')">
+                <button type="submit" class="w-full bg-red-50 text-red-600 border border-red-100 hover:bg-red-600 hover:text-white font-black uppercase text-xs py-3 px-4 rounded-xl transition-all tracking-wider flex items-center justify-center gap-2 shadow-sm">
+                    Reiniciar Sistema
                 </button>
             </form>
         </div>
     </div>
 
-    <div class="lg:col-span-2">
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Circuitos Registrados</h3>
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+        
+        <div>
+            <div class="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <h3 class="text-lg font-black text-red-600">Circuitos Registrados</h3>
+                <span class="text-xs font-bold px-3 py-1 bg-blue-100 text-blue-700 rounded-full uppercase">
+                    {{ circuits|length }} Totales
+                </span>
             </div>
-            <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 text-slate-400 font-semibold text-[11px] uppercase">
-                    <tr>
-                        <th class="px-6 py-4">Nombre / Nomen</th>
-                        <th class="px-6 py-4 text-center">Tensión</th>
-                        <th class="px-6 py-4 text-center">Bloque</th>
-                        <th class="px-6 py-4 text-right">Acción</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    {% for c in circuits %}
-                    <tr class="hover:bg-slate-50/80 transition-colors">
-                        <!-- El formulario incrustado fue eliminado para dejar solo texto limpio -->
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-slate-900">{{ c.name }}</div>
-                            <div class="text-xs text-slate-400 font-mono">{{ c.nomenclature }}</div>
-                        </td>
-                        <td class="px-6 py-4 text-center font-medium text-slate-700">{{ c.voltage }} kV</td>
-                        <td class="px-6 py-4 text-center font-medium text-slate-700">Bloque {{ c.block }}</td>
-                        <td class="px-6 py-4 text-right flex justify-end gap-2">
-                            <button onclick="fillForm('{{c.id}}', '{{c.name}}', '{{c.nomenclature}}', '{{c.voltage}}', '{{c.block}}', '{{c.amps}}')" class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase hover:bg-blue-100 transition-colors">Editar</button>
-                            <a href="/delete_circuit/{{c.id}}" onclick="return confirm('¿Borrar circuito?')" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase hover:bg-red-100 transition-colors">Borrar</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+            <div class="max-w-sm px-6 py-4">
+                <label for="searchCircuit" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                    Buscar Circuito
+                </label>
+                <div class="relative">
+                    <input type="text" id="searchCircuit" placeholder="Nombre o Nomenclatura..."
+                        class="w-full text-sm border border-slate-200 bg-white rounded-xl p-2.5 pl-9 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-medium shadow-sm text-slate-800">
+                    <div class="absolute left-3 top-3 text-slate-400 text-sm">
+                        🔍
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="text-[10px] uppercase font-black text-slate-500 bg-slate-100/80 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-3.5 text-left">Circuito</th>
+                            <th class="px-6 py-3.5 text-left">Nomenclatura</th>
+                            <th class="px-6 py-3.5 text-center">Voltaje</th>
+                            <th class="px-6 py-3.5 text-center">Bloque</th>
+                            <th class="px-6 py-3.5 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 font-bold">
+                        {% for c in circuits %}
+                        <tr class="circuit-item hover:bg-slate-50/80 transition-colors" data-name="{{ c.name | lower }}" data-nomenclature="{{ c.nomenclature | lower }}">
+                            <td class="px-6 py-4 text-slate-900 uppercase font-black">{{ c.name }}</td>
+                            <td class="px-6 py-4"><span class="font-mono text-blue-600 text-xs bg-blue-50 px-2 py-1 rounded">{{ c.nomenclature }}</span></td>
+                            
+                            <td class="px-6 py-4 text-center">
+                                {% if c.voltage == 13.8 %}
+                                <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-black rounded-md">13.8 kV</span>
+                                {% else %}
+                                <span class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-black rounded-md">34.5 kV</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-center">
+    <span class="px-2.5 py-1 bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-black rounded-md uppercase">
+        Bloque {{ c.block }}
+    </span>
+</td>
+                            <td class="px-6 py-4 text-right flex justify-end gap-2">
+                                <button onclick="fillForm('{{c.id}}', '{{c.name}}', '{{c.nomenclature}}', '{{c.voltage}}', '{{c.block}}', '{{c.amps}}')" class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-md text-[10px] font-black uppercase hover:bg-blue-600 hover:text-white transition-all">Editar</button>
+                                <a href="/delete_circuit/{{c.id}}" onclick="confirmLink(event, '¿Deseas eliminar permanentemente este circuito del catálogo?')" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-md text-[10px] font-black uppercase hover:bg-red-600 hover:text-white transition-all">Borrar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        <div class="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4">
+            <div class="flex flex-1 justify-between sm:hidden">
+                <button id="prevBtnMob" class="relative inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-40">
+                    Anterior
+                </button>
+                <button id="nextBtnMob" class="relative inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-40">
+                    Siguiente
+                </button>
+            </div>
+
+            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-xs text-slate-500 font-semibold">
+                        Mostrando <span id="startItem" class="font-black text-slate-900">0</span> a <span id="endItem" class="font-black text-slate-900">0</span> de <span id="totalItems" class="font-black text-slate-900">0</span> circuitos registrados
+                    </p>
+                </div>
+                <div>
+                    <nav class="isolate inline-flex -space-x-px rounded-xl shadow-sm bg-white" aria-label="Pagination" id="paginationNav">
+                        </nav>
+                </div>
+            </div>
+        </div>
+
     </div>
+</div>
 
 <script>
 function fillForm(id, name, nomen, volt, block, amps) {
-    document.getElementById('form-title').innerText = 'Editar: ' + name;
+    document.getElementById('form-title').innerHTML = 'Editar: <span class="text-blue-600">' + name + '</span>';
     document.getElementById('circuit-form').action = '/update_circuit';
     document.getElementsByName('id')[0].value = id;
     document.getElementsByName('name')[0].value = name;
@@ -93,8 +155,118 @@ function fillForm(id, name, nomen, volt, block, amps) {
     document.getElementsByName('voltage')[0].value = volt;
     document.getElementsByName('block')[0].value = block;
     document.getElementsByName('amps')[0].value = amps;
-    window.scrollTo({top: 0, behavior: 'smooth'});
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const itemsPerPage = 10; 
+    let currentPage = 1;
+
+    const searchInput = document.getElementById('searchCircuit');
+    const items = document.querySelectorAll('.circuit-item');
+    const paginationNav = document.getElementById('paginationNav');
+    const startItemEl = document.getElementById('startItem');
+    const endItemEl = document.getElementById('endItem');
+    const totalItemsEl = document.getElementById('totalItems');
+    const prevBtnMob = document.getElementById('prevBtnMob');
+    const nextBtnMob = document.getElementById('nextBtnMob');
+
+    function updateCardView() {
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        
+        let filteredItems = [];
+        items.forEach(item => {
+            const name = item.getAttribute('data-name') || '';
+            const nomenclature = item.getAttribute('data-nomenclature') || '';
+            
+            if (name.includes(searchTerm) || nomenclature.includes(searchTerm)) {
+                filteredItems.push(item);
+            } else {
+                item.style.display = 'none'; 
+            }
+        });
+
+        const totalItems = filteredItems.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const startIdx = (currentPage - 1) * itemsPerPage;
+        const endIdx = Math.min(startIdx + itemsPerPage, totalItems);
+
+        filteredItems.forEach((item, index) => {
+            if (index >= startIdx && index < endIdx) {
+                item.style.display = ''; 
+            } else {
+                item.style.display = 'none'; 
+            }
+        });
+
+        if (startItemEl) startItemEl.textContent = totalItems === 0 ? 0 : startIdx + 1;
+        if (endItemEl) endItemEl.textContent = endIdx;
+        if (totalItemsEl) totalItemsEl.textContent = totalItems;
+
+        renderButtons(totalPages);
+    }
+
+    function renderButtons(totalPages) {
+        if (!paginationNav) return;
+        paginationNav.innerHTML = '';
+
+        // Botón Anterior (‹)
+        const prevBtn = document.createElement('button');
+        prevBtn.className = `relative inline-flex items-center rounded-l-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all`;
+        prevBtn.innerHTML = '‹';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; updateCardView(); } };
+        paginationNav.appendChild(prevBtn);
+
+        // Números de Página
+        for (let i = 1; i <= totalPages; i++) {
+            const pageBtn = document.createElement('button');
+            if (i === currentPage) {
+                pageBtn.className = `relative z-10 inline-flex items-center bg-blue-600 px-3 py-2 text-xs font-black text-white focus:z-20`;
+            } else {
+                pageBtn.className = `relative inline-flex items-center border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 hover:bg-slate-50 transition-all`;
+            }
+            pageBtn.textContent = i;
+            pageBtn.onclick = () => { currentPage = i; updateCardView(); };
+            paginationNav.appendChild(pageBtn);
+        }
+
+        // Botón Siguiente (›)
+        const nextBtn = document.createElement('button');
+        nextBtn.className = `relative inline-flex items-center rounded-r-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all`;
+        nextBtn.innerHTML = '›';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; updateCardView(); } };
+        paginationNav.appendChild(nextBtn);
+
+        if (prevBtnMob) prevBtnMob.disabled = currentPage === 1;
+        if (nextBtnMob) nextBtnMob.disabled = currentPage === totalPages;
+    }
+
+    if (prevBtnMob) prevBtnMob.onclick = () => { if (currentPage > 1) { currentPage--; updateCardView(); } };
+    if (nextBtnMob) {
+        nextBtnMob.onclick = () => {
+            const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            let matchCount = 0;
+            items.forEach(item => {
+                const name = item.getAttribute('data-name') || '';
+                const nomenclature = item.getAttribute('data-nomenclature') || '';
+                if (name.includes(searchTerm) || nomenclature.includes(searchTerm)) matchCount++;
+            });
+            const totalPages = Math.ceil(matchCount / itemsPerPage) || 1;
+            if (currentPage < totalPages) { currentPage++; updateCardView(); }
+        };
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            currentPage = 1;
+            updateCardView();
+        });
+    }
+    updateCardView();
+});
 </script>
-</div>
 {% endblock %}

@@ -33,12 +33,11 @@ class Circuit:
         self.is_consigned = is_consigned
         self.last_outage_duration = last_outage_duration
 
-        # CALCULO MW
-        self.mw = self.calculate_mw()
-
         # TIEMPO EN VIVO
         self.outage_time = self.calculate_outage_time()
-
+        
+        # CALCULO MW
+        self.mw = self.calculate_mw()
     def calculate_mw(self):
         factor = 0.02 if self.voltage == 13.8 else 0.05
         return round(self.amps * factor, 2)
