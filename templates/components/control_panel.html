@@ -1,0 +1,50 @@
+<div class="bg-blue-950 p-2 rounded-2xl border border-slate-200 shadow-sm mb-6 mt-6">
+    <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
+
+        <div class="p-0 rounded-xl shadow-inner w-full lg:w-auto">
+            <form action="/consign" method="POST" class="flex flex-wrap sm:flex-nowrap gap-3 items-center">
+                <input type="text" name="name" placeholder="NOMBRE CIRCUITO"
+                    class="text-[13px] border border-slate-700 bg-slate-100 text-blue rounded-lg p-2.5 outline-none w-full sm:w-36 uppercase font-black placeholder:text-slate-500 placeholder:font-normal focus:ring-2 focus:ring-green-500 transition-all" required>
+
+                <input type="text" name="nomenclature" placeholder="NOMENCLATURA"
+                    class="text-[13px] border border-slate-700 bg-slate-100 text-blue rounded-lg p-2.5 outline-none w-full sm:w-36 uppercase font-black placeholder:text-slate-500 placeholder:font-normal focus:ring-2 focus:ring-green-500 transition-all" required>
+
+                <button name="action" value="consignar" 
+                    class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow hover:shadow-red-500/30">
+                    Consignar
+                </button>
+            </form>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+            
+            <div class="relative group w-full sm:w-auto">
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none transition-all duration-300 group-focus-within:text-blue-600">
+                    🔍
+                </div>
+                <input type="text" id="searchCircuit" placeholder="Buscar circuito/Nomenclatura..."
+                    class="w-full sm:w-64 pl-12 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 shadow-sm text-sm font-semibold text-slate-700 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100/50 hover:border-slate-300">
+            </div>
+
+            <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner w-full sm:w-auto justify-center">
+                <button onclick="filterByStatus('todos', this)" class="tab-btn bg-blue-600 text-white shadow-sm px-4 py-2 text-[11px] font-black uppercase tracking-wider rounded-lg transition-all flex items-center gap-2">
+                    📁 TODOS
+                </button>
+                <button onclick="filterByStatus('pac', this)" class="tab-btn text-slate-600 hover:bg-white hover:text-blue-700 px-4 py-2 text-[11px] font-black uppercase tracking-wider rounded-lg transition-all flex items-center gap-2">
+                    ⚠️ PAC
+                </button>
+                <button onclick="filterByStatus('falla', this)" class="tab-btn text-slate-600 hover:bg-white hover:text-blue-700 px-4 py-2 text-[11px] font-black uppercase tracking-wider rounded-lg transition-all flex items-center gap-2">
+                    💥 FALLA
+                </button>
+                <button onclick="filterByStatus('mantenimiento', this)" class="tab-btn text-slate-600 hover:bg-white hover:text-blue-700 px-4 py-2 text-[11px] font-black uppercase tracking-wider rounded-lg transition-all flex items-center gap-2">
+                    🛠️ MANTENIMIENTO
+                </button>
+                <button type="button" onclick="filterByStatus('activo', this)" class="tab-btn px-4 py-2.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 text-slate-600 hover:bg-slate-100 flex items-center gap-2">
+                ⏳ ACTIVOS
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>

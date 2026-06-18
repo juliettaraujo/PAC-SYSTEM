@@ -5,6 +5,13 @@ app = Flask(__name__)
 app.secret_key = 'pac_system_corpoelec'
 backend.init_db()
 
+# Esta función inyecta la lista de bloques automáticamente en el proyecto
+@app.context_processor
+def inject_blocks():
+# Para cambiar, agregar o quitar bloques, se modifica aquí:
+    bloques_operativos = ["A", "B", "C", "D"]
+    return dict(BLOQUES=bloques_operativos)
+
 @app.route('/')
 def index():
     # 1. Obtenemos los circuitos separados por estado
@@ -15,11 +22,11 @@ def index():
     
     # 3. Enviamos todas las variables al HTML
     return render_template('index.html', 
-                           circuits=activos, 
-                           consignados=consignados, 
-                           total_dia=total_dia, 
-                           pac_mw=pac_mw, 
-                           recuperados_mw=recuperados_mw)
+                circuits=activos, 
+                consignados=consignados, 
+                total_dia=total_dia, 
+                pac_mw=pac_mw, 
+                recuperados_mw=recuperados_mw)
 
 @app.route('/config')
 def config():
@@ -39,8 +46,8 @@ def add_circuit():
 @app.route('/update_circuit', methods=['POST'])
 def update_circuit():
     backend.update_circuit(request.form['id'], request.form['name'], 
-                           request.form['nomenclature'], request.form['voltage'], 
-                           request.form['block'], request.form['amps'])
+    request.form['nomenclature'], request.form['voltage'], 
+    request.form['block'], request.form['amps'])
     return redirect('/config')
 
 @app.route('/delete_circuit/<int:c_id>')
@@ -51,8 +58,8 @@ def delete_circuit(c_id):
 @app.route('/update_monitor', methods=['POST'])
 def update_monitor():
     backend.update_monitor(request.form['id'], request.form['status'], 
-                           request.form['start_time'], request.form['end_time'], 
-                           request.form['amps'])
+    request.form['start_time'], request.form['end_time'], 
+    request.form['amps'])
     return redirect('/')
 
 @app.route('/consign', methods=['GET', 'POST'])
@@ -95,6 +102,12 @@ def history():
 def delete_history(h_id):
     backend.delete_history_item(h_id)
     return redirect('/history')
+
+@app.route('/reset_system', methods=['POST'])
+def reset_system():
+    backend.reset_system_states()
+    flash('Sistema restablecido con éxito.', 'success')
+    return redirect('/')
 
 @app.route('/clear_history')
 def clear_history():

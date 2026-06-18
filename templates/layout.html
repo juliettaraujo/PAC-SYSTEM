@@ -6,278 +6,15 @@
     <title>PAC control system</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-    <style>
-
-        :root{
-            --corp-blue:#003b7a;
-            --corp-blue-dark:#002147;
-            --corp-red:#d71920;
-            --corp-green:#00a015;
-            --corp-bg:#e6e7fa;
-            --corp-text:#2b1719;
-        }
-
-        *{
-            font-family:'Inter',sans-serif;
-        }
-
-        body{
-            background: var(--corp-bg);
-            color: var(--corp-text);
-        }
-
-        /* =========================
-           NAVBAR PRINCIPAL
-        ========================== */
-
-        .main-navbar{
-            background:white;
-            border-bottom:4px solid var(--corp-red);
-            box-shadow:0 2px 10px rgba(0,0,0,.05);
-        }
-
-        .main-navbar-inner{
-            max-width:1400px;
-            margin:auto;
-            height:78px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            padding:0 30px;
-        }
-
-        .logo-area{
-            display:flex;
-            align-items:center;
-            gap:16px;
-        }
-
-        .logo-bar{
-            width:7px;
-            height:40px;
-            background:var(--corp-green);
-            border-radius:999px;
-        }
-
-        .logo-text{
-            display:flex;
-            align-items:center;
-            gap:4px;
-            font-size:34px;
-            font-weight:900;
-            letter-spacing:-1px;
-            color:var(--corp-blue);
-        }
-
-        .logo-text span{
-            color:var(--corp-red);
-        }
-
-        .nav-links{
-            display:flex;
-            gap:40px;
-        }
-
-        /* ===== NAVBAR ITEMS ===== */
-
-        .nav-item{
-            position: relative;
-            padding: 10px 18px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            color: #383838;
-            transition: all .25s ease;
-}
-        /* HOVER */
-        .nav-item:hover{
-            background: rgba(37,99,235,.08);
-            color: #1400c9;
-        }
-        .nav-link{
-            position:relative;
-            color:#475569;
-            font-weight:800;
-            font-size:14px;
-            transition:.2s;
-            padding:28px 0;
-        }
-
-        /* ITEM ACTIVO */
-        .active-nav{
-            background: rgba(37,99,235,.12);
-            color: #0400e2;
-
-        }
-
-        .nav-link:hover{
-            color:var(--corp-blue);
-        }
-
-        .nav-link.active{
-            color:var(--corp-blue);
-        }
-
-        .nav-link.active::after{
-            content:'';
-            position:absolute;
-            left:0;
-            bottom:0;
-            width:100%;
-            height:4px;
-            background:var(--corp-red);
-            border-radius:999px;
-        }
-
-        /* =========================
-           CONTENIDO
-        ========================== */
-
-        .page-container{
-            max-width:1400px;
-            margin:auto;
-            padding:35px;
-        }
-
-        /* =========================
-           TARJETAS
-        ========================== */
-
-        .corp-card{
-            background:rgb(255, 255, 255);
-            border-radius:20px;
-            border:1px solid #b4b4b6;
-            box-shadow:
-                0 2px 4px rgba(0,0,0,.03),
-                0 8px 20px rgba(0,0,0,.04);
-        }
-
-        .corp-blue-card{
-            background:linear-gradient(
-                135deg,
-                var(--corp-blue-dark),
-                var(--corp-blue)
-            );
-            color:white;
-        }
-
-        .corp-green-line{
-            border-left:6px solid var(--corp-green);
-        }
-
-        .corp-red-line{
-            border-left:6px solid var(--corp-red);
-        }
-
-        /* =========================
-           TABLAS
-        ========================== */
-
-        .table-header{
-            background:linear-gradient(
-                90deg,
-                var(--corp-blue-dark),
-                var(--corp-blue)
-            );
-            color:white;
-        }
-
-        .table-row{
-            transition:.15s;
-        }
-
-        .table-row:hover{
-            background:#b3b3d398;
-        }
-
-        /* =========================
-           BADGES
-        ========================== */
-
-        .badge{
-            padding:4px 10px;
-            border-radius:999px;
-            font-size:11px;
-            font-weight:800;
-            letter-spacing:.5px;
-        }
-
-        .badge-active{
-            background:#dcfce7;
-            color:#07cf22;
-        }
-
-        .badge-pac{
-            background:#fee2e2;
-            color:#b80202;
-        }
-
-        .badge-maintenance{
-            background:#fef3c7;
-            color:#ffd900;
-        }
-
-        .badge-consigned{
-            background:#dbeafe;
-            color:#1d4ed8;
-        }
-
-        /* =========================
-           BOTONES
-        ========================== */
-
-        .btn-blue{
-            background:var(--corp-blue);
-            color:white;
-        }
-
-        .btn-blue:hover{
-            background:var(--corp-blue-dark);
-        }
-
-        .btn-red{
-            background:var(--corp-red);
-            color:white;
-        }
-
-        .btn-red:hover{
-            opacity:.9;
-        }
-
-        .btn-green{
-            background:var(--corp-green);
-            color:white;
-        }
-
-        .btn-green:hover{
-            opacity:.9;
-        }
-
-        /* =========================
-           INPUTS
-        ========================== */
-
-        input, select{
-            border:1px solid #b8b0da !important;
-        }
-
-        input:focus, select:focus{
-            outline:none;
-            border-color:var(--corp-blue) !important;
-            box-shadow:0 0 0 3px rgba(0,59,122,.1);
-        }
-
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 
 <!-- HEADER CORPORATIVO -->
 <header class="bg-white sticky top-0 z-50">
 
-    <div class="max-w-[1800px] mx-auto flex items-center justify-between px-8 py-5">
+    <div class="max-w-[1800px] mx-auto flex items-center justify-between px-2 py-2">
 
         <!-- IZQUIERDA -->
         <div class="flex items-center gap-4">
@@ -296,7 +33,7 @@
                 src="{{ url_for('static', filename='img/corpoelec.png') }}"
                 class="h-18 object-contain"
             >
-             <!-- MENU -->
+            <!-- MENU -->
     <div class="flex items-center gap-8 mt-3">
 
         <!-- MONITOR -->
@@ -350,6 +87,56 @@
         {% block content %}{% endblock %}
 
     </main>
+<script>
+// 1. Para enlaces (como el botón Borrar de las tablas)
+function confirmLink(event, mensaje) {
+    event.preventDefault(); // Detiene la navegación instantánea
+    const url = event.currentTarget.getAttribute('href');
 
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: mensaje,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        customClass: {
+            popup: 'rounded-2xl border border-slate-100 shadow-xl',
+            confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase px-4 py-2.5 rounded-xl mx-2 tracking-wider transition-all',
+            cancelButton: 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase px-4 py-2.5 rounded-xl mx-2 tracking-wider transition-all'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url; // Redirecciona si confirma
+        }
+    });
+}
+
+// 2. Para formularios (como el botón de Reiniciar Sistema)
+function confirmForm(event, mensaje, botonTexto = 'Sí, continuar') {
+    event.preventDefault(); // Detiene el envío del formulario
+    const form = event.target;
+
+    Swal.fire({
+        title: '¿Confirmar acción?',
+        text: mensaje,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: botonTexto,
+        cancelButtonText: 'Cancelar',
+        customClass: {
+            popup: 'rounded-2xl border border-slate-100 shadow-xl',
+            confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase px-4 py-2.5 rounded-xl mx-2 tracking-wider transition-all',
+            cancelButton: 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase px-4 py-2.5 rounded-xl mx-2 tracking-wider transition-all'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit(); // Envía el formulario si confirma
+        }
+    });
+}
+</script>
 </body>
 </html>
