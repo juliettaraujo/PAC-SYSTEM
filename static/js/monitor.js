@@ -2,6 +2,19 @@
 let currentStatusFilter = 'todos';
 let currentSearchTerm = '';
 
+// Esperar a que el DOM esté completamente cargado
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("searchCircuit");
+    
+    // Solo agregar el listener si el elemento realmente existe en la vista actual
+    if (searchInput) {
+        searchInput.addEventListener("keyup", function() {
+            currentSearchTerm = this.value.toLowerCase();
+            applyCombinedFilters();
+        });
+    }
+});
+
 // Función ejecutada al hacer click en cualquier pestaña
 function filterByStatus(status, buttonElement) {
     currentStatusFilter = status.toLowerCase();
@@ -45,6 +58,46 @@ function getOutageDurationMs(card) {
     return now - startTime;
 }
 
+// Función auxiliar para calcular la duración exacta en minutos leyendo el texto visible
+function getDurationInMinutes(card) {
+    // Capturamos todo el texto visible dentro de la tarjeta
+    let text = card.innerText || "";
+
+    // FILTRO ESTRICTO: Si el texto contiene guiones, lo descartamos inmediatamente
+    if (text.includes('--:--') || text.includes('-- : --')) {
+        return -1;
+    }
+
+    // BUSCADOR DE PATRÓN: Busca un texto con el formato "14:26 - 15:24"
+    let timeMatch = text.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+    
+    if (timeMatch) {
+        let sParts = timeMatch[1].split(':');
+        let eParts = timeMatch[2].split(':');
+        
+        // Convertimos todo a minutos para la matemática
+        let startMins = parseInt(sParts[0], 10) * 60 + parseInt(sParts[1], 10);
+        let endMins = parseInt(eParts[0], 10) * 60 + parseInt(eParts[1], 10);
+        
+        let duration = endMins - startMins;
+        
+        // Si el circuito cayó antes de la medianoche y volvió después
+        if (duration < 0) {
+            duration += 24 * 60; 
+        }
+        return duration;
+    }
+
+    // FALLBACK: Si no detecta el formato de horas, busca si la tarjeta dice "XX min"
+    let minMatch = text.match(/(\d+)\s*min/);
+    if (minMatch) {
+        return parseInt(minMatch[1], 10);
+    }
+
+    // Si no tiene horas ni dice "min", es inválido
+    return -1;
+}
+
 // MOTOR DE FILTRADO COMBINADO INTEGRADO
 function applyCombinedFilters() {
     let cards = document.querySelectorAll(".circuit-card");
@@ -55,12 +108,21 @@ function applyCombinedFilters() {
     const unifiedIndicator = document.getElementById("unified-indicator");
     const unifiedHeader = document.getElementById("unified-header");
 
-    // Contenedores para la lista de circuitos recuperados
     const fsContainer = document.getElementById("fs-chronological-container");
     const fsListHolder = document.getElementById("fs-list-holder");
-
-    // Registro dinámico para saber qué bloques conservan circuitos visibles
     const activeBlocks = {};
+
+    // 🌟 EL SALVAVIDAS: Rescatar todas las tarjetas ANTES de hacer cualquier filtro
+    // Esto evita que las tarjetas se borren al cambiar entre pestañas
+    cards.forEach(card => {
+        const originalBlock = card.getAttribute('data-block');
+        const originalContainer = document.getElementById(`original-block-${originalBlock}`);
+        
+        // Si la tarjeta no está en su contenedor original, la devolvemos inmediatamente
+        if (originalContainer && card.parentNode !== originalContainer) {
+            originalContainer.appendChild(card);
+        }
+    });
 
     // ==========================================
     // CASO 1: MODO VISTA GENERAL (TODOS)
@@ -75,16 +137,12 @@ function applyCombinedFilters() {
             const badge = card.querySelector('.block-badge');
             if (badge) badge.classList.add('hidden');
 
-            // Retornar físicamente el circuito a su bloque correspondiente
-            const originalBlock = card.getAttribute('data-block');
-            const originalContainer = document.getElementById(`original-block-${originalBlock}`);
-            if (originalContainer && card.parentNode !== originalContainer) {
-                originalContainer.appendChild(card);
-            }
-
+            // Ya no necesitamos regresarlas aquí porque lo hicimos arriba en "El Salvavidas"
+            
             // Evaluar coincidencia con la barra de búsqueda de texto
             if (searchMatch) {
                 card.style.display = "";
+                const originalBlock = card.getAttribute('data-block');
                 if (originalBlock) {
                     activeBlocks[originalBlock] = true;
                 }
@@ -109,7 +167,7 @@ function applyCombinedFilters() {
         });
 
     // ==========================================
-    // CASO 2: PESTAÑA ACTIVOS (CIRCUITOS EN LINEA)
+    // CASO 2: PESTAÑA ACTIVOS (CIRCUITOS RECUPERADOS)
     // ==========================================
     } else if (currentStatusFilter === 'activo') {
         if (blocksGrid) blocksGrid.classList.add('hidden');
@@ -117,19 +175,35 @@ function applyCombinedFilters() {
         if (unifiedView) unifiedView.classList.remove('hidden');
 
         if (unifiedTitle && unifiedIndicator && unifiedHeader) {
-            unifiedTitle.textContent = `Circuitos en ACTIVOS`;
+            unifiedTitle.textContent = `Circuitos Recuperados`;
             unifiedIndicator.className = "w-2 h-8 rounded-full bg-green-500";
             unifiedHeader.className = "table-header px-4 py-3 flex items-center justify-between flex-shrink-0 bg-slate-900 text-white rounded-t-xl border-b-2 border-green-500";
         }
 
+        // 1. Filtrado leyendo el contenido real de la tarjeta
         const matchingCards = Array.from(cards).filter(card => {
             let text = card.innerText.toLowerCase();
             let cardStatus = (card.getAttribute("data-status") || "").toLowerCase();
-            return cardStatus === 'activo' && text.includes(currentSearchTerm);
+            
+            // Calculamos la duración con la nueva función lectora
+            let durationMins = getDurationInMinutes(card);
+            
+            // CONDICIONES: 
+            // - El circuito debe ser "activo" en la base de datos
+            // - La duración debe ser válida (0 o más). El "-1" de los guiones lo dejará por fuera.
+            // - Debe coincidir con la barra de búsqueda si el operador escribe algo
+            return cardStatus === 'activo' && durationMins >= 0 && text.includes(currentSearchTerm);
         });
 
+        // 2. Ordenamiento Ascendente (Matemática simple para ordenar de menor a mayor)
+        matchingCards.sort((a, b) => {
+            return getDurationInMinutes(a) - getDurationInMinutes(b);
+        });
+
+        // Ocultar todas las tarjetas inicialmente
         cards.forEach(card => card.style.display = "none");
 
+        // Renderizar las que pasaron la prueba
         if (unifiedHolder) {
             unifiedHolder.innerHTML = '';
             matchingCards.forEach(card => {
@@ -360,6 +434,40 @@ function updateLiveChronometers() {
 
         chrono.textContent = formattedTime;
     });
+}
+
+function confirmShiftChange() {
+    const modal = document.getElementById('modalConfirm');
+    const msgElement = document.getElementById('modalMessage');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const form = document.getElementById('shiftChangeForm');
+
+    if (!modal || !msgElement || !confirmBtn) return;
+
+    // Configurar el texto de advertencia del modal
+    msgElement.textContent = '¿Seguro que desea realizar el Cambio de Guardia? Se verificarán y limpiarán los estados del monitor correspondientes al turno anterior.';
+
+    // Mostrar el modal quitando la clase hidden y aplicando transiciones
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.querySelector('div').classList.remove('scale-95');
+    }, 10);
+
+    // Acción al confirmar: enviar el formulario
+    confirmBtn.onclick = function() {
+        form.submit();
+    };
+
+    // Acción al cancelar: cerrar el modal de forma segura
+    cancelBtn.onclick = function() {
+        modal.classList.add('opacity-0');
+        modal.querySelector('div').classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    };
 }
 
 // Inicializadores automáticos

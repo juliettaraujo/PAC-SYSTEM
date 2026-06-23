@@ -1,15 +1,12 @@
-<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
 
-    <!-- TOTAL DEL DIA -->
-    <div class="corp-card corp-blue-card p-4 relative overflow-hidden">
+    <div class="corp-card corp-blue-card p-4 relative overflow-hidden md:col-start-1 md:row-start-1">
         <div class="flex items-center gap-2">
-    <span class="text-xl">⚡</span>
-
-    <p class="text-white text-[13px] uppercase tracking-[2px] font-black text-blue-100">
-        Carga Total Administrada
-    </p>
-</div>
-
+            <span class="text-xl">⚡</span>
+            <p class="text-white text-[13px] uppercase tracking-[2px] font-black text-blue-100">
+                Carga Total Administrada
+            </p>
+        </div>
         <div class="flex items-end gap-2 mt-3">
             <h2 class="text-5xl font-black leading-none">
                 {{ total_dia }}
@@ -20,15 +17,13 @@
         </div>
     </div>
 
-    <!-- PAC ACTIVO -->
-    <div class="corp-card corp-blue-card p-4 relative overflow-hidden">
+    <div class="corp-card corp-blue-card p-4 relative overflow-hidden md:col-start-2 md:row-start-1">
         <div class="flex items-center gap-2">
-    <span class="text-xl">🚨</span>
-
-    <p class="text-white text-[13px] uppercase tracking-[2px] font-black text-blue-100">
-        MW en PAC Activo
-    </p>
-</div>
+            <span class="text-xl">🚨</span>
+            <p class="text-white text-[13px] uppercase tracking-[2px] font-black text-blue-100">
+                MW en PAC Activo
+            </p>
+        </div>
         <div class="flex items-end gap-2 mt-3">
             <h2 class="text-5xl font-black text-red-600 leading-none">
                 {{ pac_mw }}
@@ -39,18 +34,15 @@
         </div>
     </div>
 
-    <!-- RECUPERADOS -->
-    <div class="corp-card corp-blue-card p-4 relative overflow-hidden">
+    <div class="corp-card corp-blue-card p-4 relative overflow-hidden md:col-start-3 md:row-start-1">
         <div class="flex items-center gap-2">
-    <span class="text-xl">✅</span>
-
-    <p class="text-white text-[13px] uppercase tracking-[2px] font-black text-blue-100">
-        MW Recuperados
-    </p>
-</div>
-
+            <span class="text-xl">✅</span>
+            <p class="text-white text-[13px] uppercase tracking-[2px] font-black text-blue-100">
+                MW Recuperados
+                </p>
+        </div>
         <div class="flex items-end gap-2 mt-3">
-            <h2 class="text-5xl font-black text-green-600 leading-none">
+            <h2 class="text-5xl font-black text-green-500 leading-none">
                 {{ recuperados_mw }}
             </h2>
             <span class="text-sm font-bold opacity-90 mb-1">
@@ -58,4 +50,12 @@
             </span>
         </div>
     </div>
+
+    <form id="shiftChangeForm" action="/shift_change" method="POST" class="w-full md:col-start-3 md:row-start-0 mt-[-8px] md:mt-0">
+    <button type="button" onclick="confirmShiftChange()"
+        class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black uppercase text-[11px] tracking-wider py-3 px-4 rounded-xl shadow-lg transition-all duration-200 transform active:scale-95 flex items-center justify-center gap-2 border border-amber-400/30">
+        🔄 Cambio de Guardia
+    </button>
+</form>
+
 </div>

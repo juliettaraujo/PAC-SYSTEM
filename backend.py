@@ -1,5 +1,5 @@
 # backend.py
-from datetime import datetime
+from datetime import datetime, timedelta
 from models import Circuit
 # Importamos la lógica de la base de datos desde el nuevo módulo
 from database import get_db, init_db 
@@ -58,7 +58,7 @@ def toggle_consignation(name, nomenclature, action):
             conn.execute('''
                 INSERT INTO history (timestamp, name, nomenclature, event, details, mw, recovered_mw, start_time, end_time, duration)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (local_time, circuit['name'], circuit['nomenclature'], 'CONSIGNACION', 'Circuito consignado manualmente', 0.0, 0.0, '', '', '0 min'))
+            ''', (local_time, circuit['name'], circuit['nomenclature'], 'CONSIGNACION', 'Circuito consignado manualmente', 0.0, 0.0, '', '', '-'))
 
         elif action == 'liberar':
             conn.execute('''
@@ -71,7 +71,7 @@ def toggle_consignation(name, nomenclature, action):
             conn.execute('''
                 INSERT INTO history (timestamp, name, nomenclature, event, details, mw, recovered_mw, start_time, end_time, duration)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (local_time, circuit['name'], circuit['nomenclature'], 'LIBERACION', 'Circuito liberado nuevamente al sistema', 0.0, 0.0, '', '', '0 min'))
+            ''', (local_time, circuit['name'], circuit['nomenclature'], 'LIBERACION', 'Circuito liberado nuevamente al sistema', 0.0, 0.0, '', '', '-'))
 
         conn.commit()
         return True
@@ -80,7 +80,32 @@ def toggle_consignation(name, nomenclature, action):
     finally:
         conn.close()
 
-# --- LÓGICA DEL MONITOR Y ESTADÍSTICAS ---
+def calcular_duracion_hm(start_time_str, end_time_str):
+    """
+    Calcula la hora en formato 'HH:MM'.
+    """
+    if not start_time_str or not end_time_str or start_time_str in ['--:--', 'None', '']:
+        return "--"
+    
+    try:
+        # Parsear las horas y minutos
+        start = datetime.strptime(start_time_str.strip(), "%H:%M")
+        end = datetime.strptime(end_time_str.strip(), "%H:%M")
+        
+        # Si la hora de fin es menor, significa que la maniobra pasó la medianoche
+        if end < start:
+            end += timedelta(days=1)
+            
+        diff = end - start
+        total_segundos = int(diff.total_seconds())
+        
+        horas = total_segundos // 3600
+        minutos = (total_segundos % 3600) // 60
+        
+        return f"{horas}h {minutos}m"
+    except Exception as e:
+        print(f"Error al calcular duración: {e}")
+        return "--"
 
 def update_monitor(c_id, status, start, end, amps):
     conn = get_db()
@@ -88,6 +113,12 @@ def update_monitor(c_id, status, start, end, amps):
     if not curr: 
         conn.close()
         return
+
+    # 🌟 PROTECCIÓN ANTI-CRASH: Si el amperaje viene vacío o inválido, forzamos un 0.0
+    try:
+        amps_val = float(amps)
+    except ValueError:
+        amps_val = 0.0
 
     current_time = datetime.now().strftime('%H:%M')
 
@@ -99,7 +130,11 @@ def update_monitor(c_id, status, start, end, amps):
     if end.strip():
         duration_val = Circuit.calculate_duration(start, end)
         duration_minutes = int(duration_val.split()[0])
-        c_obj = Circuit(voltage=curr['voltage'], amps=float(amps))
+        
+        #Calcula el string formateado para la tabla history
+        duration_hm = calcular_duracion_hm(start, end)
+
+        c_obj = Circuit(voltage=curr['voltage'], amps=amps_val)
         mw_snapshot = c_obj.mw
         local_time = datetime.now().strftime('%Y-%m-%d %H:%M')
 
@@ -107,7 +142,7 @@ def update_monitor(c_id, status, start, end, amps):
             conn.execute('''
                 INSERT INTO history (timestamp, name, nomenclature, event, details, mw, recovered_mw, start_time, end_time, duration)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (local_time, curr['name'], curr['nomenclature'], status, f"Desde {start} hasta {end}", mw_snapshot, mw_snapshot, start, end, duration_val))    
+            ''', (local_time, curr['name'], curr['nomenclature'], status, f"Desde {start} hasta {end}", mw_snapshot, mw_snapshot, start, end, duration_hm))    
             
         new_pac = curr['pac']
         if status == 'PAC':
@@ -120,10 +155,11 @@ def update_monitor(c_id, status, start, end, amps):
             WHERE id=?
         ''', (time_range, new_pac, duration_minutes, c_id))
     else:
-        c_obj = Circuit(voltage=curr['voltage'], amps=float(amps))
+        # Usamos nuestra variable segura amps_val
+        c_obj = Circuit(voltage=curr['voltage'], amps=amps_val)
         conn.execute('''
             UPDATE circuits SET status=?, start_time=?, amps=?, mw=? WHERE id=?
-        ''', (status, start, float(amps), c_obj.mw, c_id))
+        ''', (status, start, amps_val, c_obj.mw, c_id))
     
     conn.commit()
     conn.close()
@@ -197,20 +233,58 @@ def clear_all_history():
 
 def reset_system_states():
     conn = get_db()
-    # Modificamos solo las variables operativas, dejando intactos los datos del circuito
+    
+    # 1. Reseteamos todos los parámetros eléctricos y de estado de los circuitos
     conn.execute('''
         UPDATE circuits 
-        SET status = 'ACTIVO', 
+        SET 
+            status = 'ACTIVO', 
             amps = 0.0,
             mw = 0.0,
             start_time = '',
             end_time = '',
             duration = '',
             pac = 0,
-            last_outage_duration = 0
+            last_outage_duration = 0,
+            is_consigned = 0
     ''')
 
-    conn.execute("DELETE FROM history")
+    # 2. BORRADO TOTAL: Eliminamos el historial. Esto obligará a las tarjetas a mostrar 0.0
+    conn.execute('DELETE FROM history')
 
+    conn.commit()
+    conn.close()
+
+def perform_shift_change():
+    conn = get_db()
+    # Capturamos la fecha de hoy (Ej: 2026-06-22)
+    today_date = datetime.now().strftime('%Y-%m-%d')
+    
+    circuits = conn.execute('SELECT * FROM circuits').fetchall()
+    
+    for c in circuits:
+        # REGLA 1: Si el circuito está afectado actualmente (PAC, FALLA), no se toca nada.
+        if c['status'] != 'ACTIVO':
+            continue
+            
+        # REGLA 2: Si está ACTIVO, buscamos si tiene un registro en la tabla history de HOY.
+        history_today = conn.execute('''
+            SELECT 1 FROM history 
+            WHERE name = ? AND timestamp LIKE ?
+            LIMIT 1
+        ''', (c['name'], f"{today_date}%")).fetchone()
+        
+        # REGLA 3: Si no hay registro de hoy, significa que la información es de guardias anteriores. La limpiamos.
+        if not history_today:
+            conn.execute('''
+                UPDATE circuits 
+                SET amps = 0.0,
+                mw = 0.0,
+                start_time = '',
+                end_time = '',
+                duration = ''
+                WHERE id = ?
+            ''', (c['id'],))
+            
     conn.commit()
     conn.close()

@@ -6,22 +6,45 @@
         <p class="text-slate-500 text-sm font-medium">Registro estrictamente al finalizar maniobras de carga.</p>
     </div>
     
-    <div class="flex flex-col md:flex-row gap-3">
-        <input type="text" id="historySearch" onkeyup="filterHistory()" 
-               placeholder="Buscar circuito o nomenclatura..." 
-               class="px-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-64 uppercase font-bold shadow-sm">
-        
-        <a href="/clear_history" onclick="confirmLink(event, '¿Seguro que desea eliminar TODO el historial de maniobras de forma permanente?')"
-           class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-red-600 hover:text-white transition-all border border-red-100 flex items-center gap-2 shadow-sm">
-            Limpiar Historial
-        </a>
-    </div>
+    <div class="flex flex-col md:flex-row gap-3 items-center">
+
+    <!-- BUSCADOR -->
+    <input type="text"
+        id="historySearch"
+        onkeyup="filterHistory()"
+        placeholder="Buscar circuito o nomenclatura..."
+        class="px-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-64 uppercase font-bold shadow-sm">
+
+    <!-- ORDEN -->
+    <select id="historyOrder"
+            onchange="sortHistory()"
+            class="px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold shadow-sm bg-white">
+
+        <option value="recent">Más recientes primero</option>
+        <option value="oldest">Más antiguos primero</option>
+
+    </select>
+
+<a href="/export_history_excel"
+    class="bg-green-600 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-green-700 transition-all flex items-center justify-center gap-2 shadow-sm">
+    📊 Exportar
+</a>
+
+    <!-- LIMPIAR -->
+    <a href="/clear_history"
+    onclick="confirmLink(event, '¿Seguro que desea eliminar TODO el historial de maniobras de forma permanente?')"
+    class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-red-600 hover:text-white transition-all border border-red-100 flex items-center gap-2 shadow-sm">
+        Limpiar Historial
+    </a>
+</div>
 </div>
 
 <div class="flex flex-col gap-4" id="historyContainer">
     {% for group in grouped_logs %}
-    <div class="history-item bg-white rounded-xl border border-slate-200 border-l-4 border-l-blue-600 shadow-sm overflow-hidden transition-all hover:shadow-md" 
-         data-name="{{ group.name }}" data-nomen="{{ group.nomenclature }}">
+    <div class="history-item bg-white rounded-xl border border-slate-200 border-l-4 border-l-blue-600 shadow-sm overflow-hidden transition-all hover:shadow-md"
+    data-name="{{ group.name }}"
+    data-nomen="{{ group.nomenclature }}"
+    data-date="{{ group.events[0].timestamp }}">
         
         <button onclick="toggleHistory('group-{{ loop.index }}')" 
                 class="w-full flex items-center justify-between px-6 py-4 hover:bg-blue-50/30 transition-all text-left">
@@ -88,8 +111,8 @@
 
                             <td class="px-6 py-3.5 text-right">
                                 <a href="/delete_history/{{ event.id }}"
-                                   onclick="confirmLink(event, '¿Deseas eliminar este registro específico del historial?')"
-                                   class="text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition-colors inline-block">
+                                onclick="confirmLink(event, '¿Deseas eliminar este registro específico del historial?')"
+                                class="text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition-colors inline-block">
                                     <span class="text-xs">✕</span>
                                 </a>
                             </td>
@@ -132,5 +155,35 @@
             }
         }
     }
+
+    function sortHistory() {
+
+        const container = document.getElementById("historyContainer");
+
+        const items = Array.from(document.querySelectorAll(".history-item")
+    );
+
+    const order = document.getElementById("historyOrder").value;
+    items.sort((a, b) => {
+        const dateA =
+            new Date(a.dataset.date.replace(" ", "T")
+            );
+
+        const dateB =
+            new Date(
+                b.dataset.date.replace(" ", "T")
+            );
+
+        if (order === "recent") {
+            return dateB - dateA;
+        } else {
+            return dateA - dateB;
+        }
+    });
+    items.forEach(item => {
+        container.appendChild(item);
+    });
+}
+
 </script>
 {% endblock %}

@@ -1,5 +1,9 @@
-from flask import Flask, render_template, request, redirect, flash
+from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import send_file
+from openpyxl import Workbook
+import os
 import backend
+
 
 app = Flask(__name__)
 app.secret_key = 'pac_system_corpoelec'
@@ -103,16 +107,86 @@ def delete_history(h_id):
     backend.delete_history_item(h_id)
     return redirect('/history')
 
+@app.route('/export_history_excel')
+def export_history_excel():
+
+    conn = backend.get_db()
+
+    rows = conn.execute('''
+        SELECT *
+        FROM history
+        ORDER BY timestamp DESC
+    ''').fetchall()
+
+    conn.close()
+
+    wb = Workbook()
+    ws = wb.active
+
+    ws.title = "Historial"
+
+    headers = [
+        "Fecha",
+        "Circuito",
+        "Nomenclatura",
+        "Evento",
+        "Detalles",
+        "MW Afectados",
+        "Hora Inicio",
+        "Hora Fin",
+        "Duración"
+    ]
+
+    ws.append(headers)
+
+    for row in rows:
+
+        ws.append([
+            row["timestamp"],
+            row["name"],
+            row["nomenclature"],
+            row["event"],
+            row["details"],
+            row["mw"],
+            row["start_time"],
+            row["end_time"],
+            row["duration"]
+        ])
+
+    file_name = "Historial_CORPOELEC.xlsx"
+
+    wb.save(file_name)
+
+    return send_file(
+        file_name,
+        as_attachment=True
+    )
+
 @app.route('/reset_system', methods=['POST'])
 def reset_system():
     backend.reset_system_states()
     flash('Sistema restablecido con éxito.', 'success')
     return redirect('/')
 
+
+@app.route('/shift_change', methods=['POST'])
+def shift_change():
+    # Ejecutamos el cambio de guardia
+    backend.perform_shift_change()
+    # Recargamos de forma segura la pantalla principal del monitor
+    return redirect('/')
+
 @app.route('/clear_history')
 def clear_history():
-    backend.clear_all_history()
+    # Conexión directa para ejecutar el vaciado completo del registro histórico
+    conn = backend.get_db()
+    conn.execute('DELETE FROM history')
+    conn.commit()
+    conn.close()
+    flash('Historial de maniobras eliminado permanentemente.', 'success')
     return redirect('/history')
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+    

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-8 border-b border-slate-200/60 pb-6">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-4 border-b border-slate-200/60 pb-2">
     
     <div class="flex flex-col items-start gap-2 w-fit flex-shrink-0">
         <div>
@@ -23,7 +23,7 @@
 
 {% include 'components/control_panel.html' %}
 
-<div id="blocks-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8 items-start">
+<div id="blocks-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-4 items-start">
     {% for b in BLOQUES %}
     <div class="corp-card overflow-hidden flex flex-col h-auto shadow-sm transition-all duration-300">
         
@@ -185,7 +185,7 @@
 </div> 
 <script src="{{ url_for('static', filename='js/monitor.js') }}"></script>
 
-<div id="confirmModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+<div id="modalConfirm" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 transform scale-95 transition-transform duration-300">
         <div class="flex items-start gap-4">
             <div class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center text-xl flex-shrink-0 animate-pulse">
