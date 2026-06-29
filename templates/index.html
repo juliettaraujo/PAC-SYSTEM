@@ -78,7 +78,7 @@
                             <span class="text-sm font-extrabold text-slate-800 block mt-0.5">{{c.mw}} <span class="text-[9px] text-slate-400 font-normal">MW</span></span>
                         </div>
                         <div class="col-span-6 sm:col-span-4">
-                            <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Maniobra (F/S)</span>
+                            <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Hora Inicio - Cierre</span>
                             <div class="flex items-center gap-1 justify-center mt-0.5">
                                 <input type="text" name="start_time" 
                                     value="{{ c.start_time if c.start_time and c.start_time != 'None' else '' }}" 
@@ -99,7 +99,7 @@
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-4 mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/60">
-                            <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Duración Total</span>
+                            <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Duración</span>
                             <div class="text-[12px] font-black text-red-600 leading-none mt-0.5">
                             {% if c.status == 'ACTIVO' %}
                                 {% if c.last_outage_duration and c.last_outage_duration != 0 %}
